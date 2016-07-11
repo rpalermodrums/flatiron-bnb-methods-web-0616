@@ -1,5 +1,6 @@
 class Reservation < ActiveRecord::Base
   belongs_to :listing
+  belongs_to :trip, :class_name => "Reservation"
   belongs_to :guest, :class_name => "User"
   has_one :review
   has_one :neighborhood, through: :listing
@@ -16,15 +17,24 @@ class Reservation < ActiveRecord::Base
   end
 
   def listing_available
-    unless self.listing.reservations.none? {|res| self.checkin.nil? || self.checkout.nil? || res.checkin > self.checkout || self.checkin < res.checkout}
+    unless nil_checkin_or_checkout || not_open?
       errors.add(:listing, "can't be booked")
     end
   end
 
   def checkin_before_checkout
-    return if self.checkin.nil? || self.checkout.nil?
-    unless self.checkin < self.checkout
+    unless nil_checkin_or_checkout || checkin < checkout
       errors.add(:listing, "can only be booked if checkin is before checkout")
+    end
+  end
+
+  def nil_checkin_or_checkout
+    checkin.nil? || checkout.nil?
+  end
+
+  def not_open?
+    listing.reservations.none? do |res|
+      res.checkin > checkout || checkin < res.checkout
     end
   end
 

@@ -4,22 +4,18 @@ class Neighborhood < ActiveRecord::Base
   has_many :reservations, through: :listings
 
   def neighborhood_openings(date1, date2)
-    
     city.city_openings(date1, date2).where(neighborhood: self)
   end
 
   def self.highest_ratio_res_to_listings
-    reservations_by_neighborhood = self.all.joins(:reservations).group('name').count
-    listings_by_neighborhood = self.all.joins(:listings).group('name').count
-    highest_ratio = reservations_by_neighborhood.max_by do |k, v|
-      reservations_by_neighborhood[k].fdiv(listings_by_neighborhood[k])
-    end.first
-    self.find_by(name: highest_ratio)
+    reservations = all.joins(:reservations).group('neighborhood_id').count
+    listings = all.joins(:listings).group('neighborhood_id').count
+    find(reservations.max_by {|k, v| v.fdiv(listings[k])}.first)
   end
 
   def self.most_res
-    find_by(name: self.all.joins(:reservations).group(:name).count.max_by {|k, v| v}.first)
-
+    res_count = all.joins(:reservations).group('neighborhood_id').count
+    find(res_count.max_by {|k, v| v }.first)
   end
 
 end

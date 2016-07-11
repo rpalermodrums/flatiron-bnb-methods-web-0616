@@ -6,13 +6,9 @@ class Review < ActiveRecord::Base
   validate :has_reseservation
 
   def has_reseservation
-    return if guest.nil?
-    return if reservation.nil?
-    # binding.pry
+    return if guest.nil? || reservation.nil?
     if guest.trips.nil? || guest.trips.last.checkout <= reservation.checkout
-      # binding.pry
       errors.add(:review, "can't be added without a completed stay")
     end
   end
-
 end

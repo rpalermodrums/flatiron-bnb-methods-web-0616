@@ -10,9 +10,7 @@ class Listing < ActiveRecord::Base
   validate :has_neigborhood
 
   def has_neigborhood
-    if self.neighborhood.nil?
-      errors.add(:neighborhood, "can't be blank")
-    end
+    errors.add(:neighborhood, "can't be blank") if self.neighborhood.nil?
   end
 
   def average_review_rating
